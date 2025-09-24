@@ -1,9 +1,20 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+val secretsPropertiesFile = rootProject.file("secrets.properties")
+val secrets = Properties()
+if (secretsPropertiesFile.exists()) {
+    secrets.load(FileInputStream(secretsPropertiesFile))
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -18,6 +29,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "OPEN_WEATHER_API_KEY", "\"${secrets.getProperty("OPEN_WEATHER_API_KEY", "")}\"")
     }
 
     buildTypes {
@@ -37,6 +50,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
@@ -49,4 +63,18 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.tv.material)
+    implementation(libs.coil.compose)
+
+    // network
+    implementation(libs.okhttp3)
+    implementation(libs.okhttp3.logging)
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi.kotlin)
+    ksp(libs.moshi.codegen)
+
+    //hilt
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
 }
